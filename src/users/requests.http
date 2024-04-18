@@ -3,9 +3,19 @@ POST  http://localhost:3000/auth/signup
 Content-Type: application/json
 
 {
-    "email": "krepe@gmail.com",
+    "email": "krepe507@gmail.com",
     "password": "trash"
 }
+
+### sign in
+POST  http://localhost:3000/auth/signin
+Content-Type: application/json
+
+{
+    "email": "krepe507@gmail.com",
+    "password": "trash"
+}
+
 
 ### Find by id
 GET http://localhost:3000/auth/2
