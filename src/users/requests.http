@@ -3,22 +3,33 @@ POST  http://localhost:3000/auth/signup
 Content-Type: application/json
 
 {
-    "email": "krepe507@gmail.com",
+    "email": "krepe512@gmail.com",
     "password": "trash"
 }
+
+### Simple test
+http://localhost:3000/auth/test
+
+
 
 ### sign in
 POST  http://localhost:3000/auth/signin
 Content-Type: application/json
 
 {
-    "email": "krepe527@gmail.com",
+    "email": "krepe504@gmail.com",
     "password": "trash"
 }
+
+### sign out
+POST  http://localhost:3000/auth/signout
 
 
 ### Find by id
 GET http://localhost:3000/auth/2
+
+### Find by who
+GET http://localhost:3000/auth/who
 
 ### Find all users with the given email
 GET http://localhost:3000/auth?email=mymail@gmail.com
@@ -35,3 +46,10 @@ Content-Type: application/json
 {
     "password" : "engine"
 }
+
+
+### Set color
+GET http://localhost:3000/auth/colors/pizza
+
+### Get color
+GET http://localhost:3000/auth/colors

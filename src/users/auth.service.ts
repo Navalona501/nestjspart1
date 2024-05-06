@@ -27,7 +27,6 @@ export class AuthService{
 
         // Create a new user and save it in the database
         const user = await this.usersService.create(email, hashedPassword);
-        console.log("created user ", user);
 
         // return the user
         return user;
@@ -48,6 +47,6 @@ export class AuthService{
             throw new BadRequestException('bad password');
         }
 
-        return user;
+        return user[0];
     }
 }
