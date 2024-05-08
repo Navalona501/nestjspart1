@@ -1,11 +1,12 @@
-import { Body, Controller, Post, Get, Patch, Delete, Param, Query, NotFoundException , Session, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Session, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '../guards/auth.guard';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UsersService } from './users.service';
 import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
 import { AuthService } from './auth.service';
-import  { CurrentUser } from './decorators/current-user.decorator';
+import { CurrentUser } from './decorators/current-user.decorator';
 import { User } from './user.entity';
 
 
@@ -13,75 +14,77 @@ import { User } from './user.entity';
 @Serialize(UserDto)
 export class UsersController {
 
-    constructor(
-        private readonly usersService: UsersService,
-        private authService: AuthService
-    ) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private authService: AuthService,
+  ) {
+  }
 
-    @Get('/test')
-    testRequest(){
-        return "request working"
+  @Get('/test')
+  testRequest() {
+    return 'request working';
+  }
+
+
+  @Post('/signup')
+  async createUser(@Body() body: CreateUserDto, @Session() session: any) {
+    const user = await this.authService.signup(body.email, body.password);
+    session.userId = user.id;
+    return user;
+  }
+
+  @Post('/signIn')
+  async signIn(@Body() body: CreateUserDto, @Session() session: any) {
+    const user = await this.authService.signin(body.email, body.password);
+    session.userId = user.id;
+    return user;
+  }
+
+  // @Get('/who')
+  // async getWho(@Session() session: any){
+  //     const user = await this.usersService.findOne(session.userId)
+  //     if(!user){
+  //         throw new BadRequestException('you are not logged in');
+  //     }
+  //
+  //     return user
+  // }
+
+  @Get('who')
+  @UseGuards(AuthGuard)
+  whoAmI(@CurrentUser() user: User) {
+    return user;
+  }
+
+  @Post('/signout')
+  signout(@Session() session: any) {
+    session.userId = null;
+
+  }
+
+  // @UseInterceptors(new SerializeInterceptor(UserDto))
+
+  @Get('/:id')
+  async findUser(@Param('id') id: string) {
+    const user = await this.usersService.findOne(parseInt(id));
+    if (!user) {
+      throw new NotFoundException('user not found');
     }
+    return user;
+  }
 
+  @Get()
+  findAllUsers(@Query('email') email: string) {
+    return this.usersService.find(email);
+  }
 
-    @Post('/signup')
-    async createUser(@Body() body: CreateUserDto, @Session() session: any) {
-        const user = await this.authService.signup(body.email, body.password);
-        session.userId = user.id;
-        return user;
-    }
+  @Delete('/:id')
+  removeUser(@Param('id') id: string) {
+    return this.usersService.remove(parseInt(id));
+  }
 
-    @Post('/signIn')
-    async signIn(@Body() body: CreateUserDto, @Session() session: any) {
-        const user = await this.authService.signin(body.email, body.password);
-        session.userId = user.id;
-        return user;
-    }
-
-    // @Get('/who')
-    // async getWho(@Session() session: any){
-    //     const user = await this.usersService.findOne(session.userId)
-    //     if(!user){
-    //         throw new BadRequestException('you are not logged in');
-    //     }
-    //
-    //     return user
-    // }
-
-    @Get('who')
-    whoAmI(@CurrentUser() user: User){
-        return user
-    }
-
-    @Post('/signout')
-    signout(@Session() session: any){
-        session.userId = null;
-
-    }
-
-    // @UseInterceptors(new SerializeInterceptor(UserDto))
-    
-    @Get('/:id')
-    async findUser(@Param('id') id: string) {
-        const user = await this.usersService.findOne(parseInt(id))
-        if(!user) {
-            throw new NotFoundException('user not found')
-        }
-        return user
-    }
-
-    @Get()
-    findAllUsers(@Query('email') email: string) {
-        return this.usersService.find(email)
-    }
-
-    @Delete('/:id')
-    removeUser(@Param('id') id: string) {
-        return this.usersService.remove(parseInt(id))
-    }
-
-    @Patch('/:id')
-    updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
-        return this.usersService.update(parseInt(id), body)
-    }
+  @Patch('/:id')
+  updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
+    return this.usersService.update(parseInt(id), body);
+  }
 }
